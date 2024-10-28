@@ -1,8 +1,8 @@
 class_name StageThreeCamera
 extends CameraControllerBase
 
-@export var follow_speed:float = 3
-@export var catchup_speed:float = 10
+@export var follow_speed:float = 5
+@export var catchup_speed:float = 15
 @export var leash_distance:float = 17
 
 func _ready():
@@ -22,20 +22,41 @@ func _process(delta: float):
 	var xdiff = target.global_position.x-global_position.x
 	var ydiff = target.global_position.z-global_position.z
 	
-	if distance > leash_distance:
-		print("leash distance exceeded")
-		global_position.x += (target.velocity.x/60)*xdiff
-		global_position.z += (target.velocity.z/60)*ydiff
+	var keep_speed = 50.0
 	
-	if target.velocity != Vector3(0,0,0):
+	if distance >= leash_distance:
+		print("leash distance exceeded")
+		if xdiff > target.WIDTH:#0.1:
+			global_position.x += keep_speed*delta#(keep_speed/60)
+		elif xdiff < -target.WIDTH:#-0.1:
+			global_position.x -= keep_speed*delta#(keep_speed/60)
+		if ydiff > target.HEIGHT:#0.1:
+			global_position.z += keep_speed*delta#(keep_speed/60)
+		elif ydiff < -target.HEIGHT:#-0.1:
+			global_position.z -= keep_speed*delta#(keep_speed/60)
+		print(global_position)
+	
+	if distance < leash_distance and target.velocity != Vector3(0,0,0):
 		#print("velocity not zero")
 		# move at follow speed
-		global_position.x += (follow_speed/60)*xdiff
-		global_position.z += (follow_speed/60)*ydiff
-	else:
-		global_position.x += (catchup_speed/60)*xdiff
-		global_position.z += (catchup_speed/60)*ydiff
-		
+		if xdiff > target.WIDTH:#0.1:
+			global_position.x += follow_speed*delta#(follow_speed/60)#*xdiff
+		elif xdiff < -target.WIDTH:#-0.1:
+			global_position.x -= follow_speed*delta#(follow_speed/60)
+		if ydiff > target.HEIGHT:#0.1:
+			global_position.z += follow_speed*delta#(follow_speed/60)#*ydiff
+		elif ydiff < -target.HEIGHT:#-0.1:
+			global_position.z -= follow_speed*delta#(follow_speed/60)
+	elif distance < leash_distance and target.velocity == Vector3(0,0,0):
+		#print("velocity zero")
+		if xdiff > 0.1:
+			global_position.x += catchup_speed*delta#(catchup_speed/60)#*xdiff
+		elif xdiff < -0.1:
+			global_position.x -= catchup_speed*delta#(catchup_speed/60)
+		if ydiff > 0.1:
+			global_position.z += catchup_speed*delta#(catchup_speed/60)#*ydiff
+		elif ydiff < -0.1:
+			global_position.z -= catchup_speed*delta#(catchup_speed/60)
 		
 	super(delta)
 	

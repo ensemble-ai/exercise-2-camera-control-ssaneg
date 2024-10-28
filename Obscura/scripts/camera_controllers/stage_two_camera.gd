@@ -3,7 +3,7 @@ extends CameraControllerBase
 
 @export var top_left:Vector2 = Vector2(-10,5)
 @export var bottom_right:Vector2 = Vector2(10,-5)
-@export var autoscroll_speed:Vector3 = Vector3(0.3,0,0)
+@export var autoscroll_speed:Vector3 = Vector3(25,0,0)
 
 func _ready():
 	position = target.position
@@ -15,7 +15,7 @@ func _process(delta: float):
 		draw_logic()
 	
 	#autoscroll
-	global_position += autoscroll_speed
+	global_position += autoscroll_speed*delta
 	
 	if target.global_position.x < (global_position.x - 10):
 		target.global_position.x = global_position.x - 10
