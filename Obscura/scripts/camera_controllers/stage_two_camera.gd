@@ -16,30 +16,24 @@ func _process(delta: float):
 	
 	#autoscroll
 	global_position += autoscroll_speed*delta
-	
-	if target.global_position.x < (global_position.x - 10):
-		target.global_position.x = global_position.x - 10
-
-		
-	var tpos = target.global_position
-	var cpos = global_position
-	
 	var box_width = abs(top_left.x - bottom_right.x)
 	var box_height = abs(top_left.y - bottom_right.y)
 	
-	#boundary checks
-	#right
-	var diff_between_right_edges = (tpos.x + target.WIDTH / 2.0) - (cpos.x + box_width / 2.0)
-	if diff_between_right_edges > 0:
-		global_position.x += diff_between_right_edges
-	#top
-	var diff_between_top_edges = (tpos.z - target.HEIGHT / 2.0) - (cpos.z - box_height / 2.0)
-	if diff_between_top_edges < 0:
-		global_position.z += diff_between_top_edges
-	#bottom
-	var diff_between_bottom_edges = (tpos.z + target.HEIGHT / 2.0) - (cpos.z + box_height / 2.0)
-	if diff_between_bottom_edges > 0:
-		global_position.z += diff_between_bottom_edges
+	#left edge
+	if (target.global_position.x - target.WIDTH / 2.0) < (global_position.x - box_width/2.0):
+		target.global_position.x = global_position.x - box_width/2.0 + target.WIDTH / 2.0
+		
+	#right edge
+	if (target.global_position.x + target.WIDTH / 2.0) > (global_position.x + box_width/2.0):
+		target.global_position.x = global_position.x + box_width/2.0 - target.WIDTH / 2.0
+	
+	#top edge
+	if (target.global_position.z - target.WIDTH / 2.0) < (global_position.z - box_height/2.0):
+		target.global_position.z = global_position.z - box_height/2.0 + target.WIDTH / 2.0
+		
+	#bottom edge
+	if (target.global_position.z + target.WIDTH / 2.0) > (global_position.z + box_height/2.0):
+		target.global_position.z = global_position.z + box_height/2.0 - target.WIDTH / 2.0
 		
 	super(delta)
 	
