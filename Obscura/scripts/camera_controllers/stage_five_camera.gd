@@ -2,10 +2,10 @@ class_name StageFiveCamera
 extends CameraControllerBase
 
 @export var push_ratio:float = 0.3
-@export var pushbox_top_left:Vector2 = Vector2(-7.5,7.5)
-@export var pushbox_bottom_right:Vector2 = Vector2(7.5,-7.5)
-@export var speedup_zone_top_left:Vector2 = Vector2(-5,5)
-@export var speedup_zone_bottom_right:Vector2 = Vector2(5,-5)
+@export var pushbox_top_left:Vector2 = Vector2(-7,7)
+@export var pushbox_bottom_right:Vector2 = Vector2(7,-7)
+@export var speedup_zone_top_left:Vector2 = Vector2(-4,4)
+@export var speedup_zone_bottom_right:Vector2 = Vector2(4,-4)
 
 func _ready():
 	position = target.position
@@ -26,7 +26,7 @@ func _process(delta: float):
 	var tpos = target.global_position
 	var cpos = global_position
 	
-	var player_speed = float(target.BASE_SPEED)#50.0
+	var player_speed = target.velocity.length()#float(target.BASE_SPEED)#50.0
 	
 	#boundaries of pushbox
 	var diff_between_left_edges = (tpos.x - target.WIDTH / 2.0) - (cpos.x - box_width / 2.0)
@@ -42,6 +42,12 @@ func _process(delta: float):
 	
 	var temp = player_speed*delta*push_ratio
 	
+	var direction = target.velocity.normalized()
+	
+	var bottom_right = diff_between_right_edges > 0 and diff_between_bottom_edges > 0 
+	var top_right = diff_between_right_edges > 0 and diff_between_top_edges < 0
+	var bottom_left = diff_between_left_edges < 0 and diff_between_bottom_edges > 0
+	var top_left = diff_between_left_edges < 0 and diff_between_top_edges < 0
 	#print(diff_between_bottom_inner, ' ', diff_between_left_inner, ' ', diff_between_right_inner, ' ', diff_between_top_inner)
 	
 	#inner-most area
@@ -51,37 +57,11 @@ func _process(delta: float):
 		
 	#1) moving, 2) not touching the outer zone pushbox, and 3) are betwen the speedup zone and the pushbox border -> move at push ratio
 	elif target.velocity != Vector3(0,0,0) and (diff_between_left_edges > 0 and diff_between_top_edges > 0 and diff_between_right_edges < 0 and diff_between_bottom_edges < 0) and (diff_between_left_inner < 0 or diff_between_right_inner > 0 or diff_between_top_inner < 0 or diff_between_bottom_inner > 0):
-		print("case 1 - push ratio * player speed")
-		if target.velocity.x > 0:
-			global_position.x += temp
-		elif target.velocity.x < 0:
-			global_position.x -= temp
-		if target.velocity.z > 0:
-			global_position.z += temp
-		elif target.velocity.z < 0:
-			global_position.z -= temp
-			
-	#full player speed in both x and y directions in corners
-	#top left
-	elif diff_between_left_edges < 0.1 and diff_between_top_edges < 0.1:
-		print("top left")
-		global_position.x -= player_speed*delta#diff_between_left_edges
-		global_position.z -= player_speed*delta#diff_between_top_edges
-	#bottom left
-	elif diff_between_left_edges < 0.1 and diff_between_bottom_edges > 0.1:
-		print("bottom left")
-		global_position.x -= player_speed*delta#diff_between_left_edges
-		global_position.z += player_speed*delta#diff_between_bottom_edges
-	#top right
-	elif diff_between_right_edges > 0.1 and diff_between_top_edges < 0.1:
-		print("top right")
-		global_position.x += player_speed*delta#diff_between_right_edges
-		global_position.z -= player_speed*delta#diff_between_top_edges
-	#bottom right
-	elif diff_between_right_edges > 0.1 and diff_between_bottom_edges > 0.1:
-		print("bottom right")
-		global_position.x += player_speed*delta#diff_between_right_edges
-		global_position.z += player_speed*delta#diff_between_bottom_edges
+		print("case 1 - push ratio * player speed")			
+		global_position += direction*player_speed*delta*push_ratio
+	
+	elif top_left or top_right or bottom_left or bottom_right:
+		global_position += direction*player_speed*delta
 	
 	#current movement speed in the direction of the touched side of the border box and at the push_ratio in the other direction
 	#left edge
@@ -92,6 +72,7 @@ func _process(delta: float):
 			global_position.z += temp
 		elif target.velocity.z < 0:
 			global_position.z -= temp
+		#global_position.z = target.velocity.z.normalized()*player_speed*push_ratio*delta
 	#right edge
 	elif diff_between_right_edges > 0:
 		print("right edge")
@@ -173,3 +154,24 @@ func draw_logic():
 	#mesh is freed after one update of _process
 	await get_tree().process_frame
 	mesh_instance.queue_free()
+
+'''elif diff_between_left_edges < 0.1 and diff_between_top_edges < 0.1:
+		print("top left")
+		global_position.x -= player_speed*delta#diff_between_left_edges
+		global_position.z -= player_speed*delta#diff_between_top_edges
+	#bottom left
+	elif diff_between_left_edges < 0.1 and diff_between_bottom_edges > 0.1:
+		print("bottom left")
+		global_position.x -= player_speed*delta#diff_between_left_edges
+		global_position.z += player_speed*delta#diff_between_bottom_edges
+	#top right
+	elif diff_between_right_edges > 0.1 and diff_between_top_edges < 0.1:
+		print("top right")
+		global_position.x += player_speed*delta#diff_between_right_edges
+		global_position.z -= player_speed*delta#diff_between_top_edges
+	#bottom right
+	elif diff_between_right_edges > 0.1 and diff_between_bottom_edges > 0.1:
+		print("bottom right")
+		global_position.x += player_speed*delta#diff_between_right_edges
+		global_position.z += player_speed*delta#diff_between_bottom_edges
+	'''

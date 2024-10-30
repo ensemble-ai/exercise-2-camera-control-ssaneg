@@ -10,6 +10,8 @@ func _process(delta: float):
 
 	if draw_camera_logic:
 		draw_logic()
+	
+	#center camera to target
 	global_position = target.global_position
 	
 	super(delta)
