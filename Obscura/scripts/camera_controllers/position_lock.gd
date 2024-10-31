@@ -1,10 +1,5 @@
-class_name StageFourCamera
+class_name PositionLock
 extends CameraControllerBase
-
-@export var lead_speed:float = 70
-@export var catchup_delay_duration:float = 7
-@export var catchup_speed:float = 30
-@export var leash_distance:float = 7
 
 func _ready():
 	position = target.position
@@ -16,31 +11,9 @@ func _process(delta: float):
 	if draw_camera_logic:
 		draw_logic()
 	
-	var player_speed = target.velocity.length()
-	var tpos = target.global_position
-	var cpos = global_position
-	var distance = (tpos-Vector3(cpos.x, 20, cpos.z)).length()
-	var direction = (tpos-Vector3(cpos.x, 20, cpos.z)).normalized()
+	#center camera to target
+	global_position = target.global_position
 	
-	#leash exceeded
-	if distance >= leash_distance:
-		global_position += direction*(distance-leash_distance)
-	
-	#move camera ahead
-	if target.velocity != Vector3(0,0,0):
-		global_position += (target.velocity.normalized())*lead_speed*delta
-		#set catchup delay
-		target.delay = catchup_delay_duration
-	
-	#catchup camera to target
-	elif target.velocity == Vector3(0,0,0) and distance > 0.25:
-		#wait the length of delay
-		if target.delay>0:
-			target.delay -= 1
-		#catchup camera
-		elif (tpos-cpos).length() > target.WIDTH / 4.0:
-			global_position += direction*catchup_speed*delta
-		
 	super(delta)
 	
 func draw_logic():

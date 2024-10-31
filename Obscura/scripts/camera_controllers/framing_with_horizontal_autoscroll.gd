@@ -1,4 +1,4 @@
-class_name StageTwoCamera
+class_name FramingWithHorizontalAutoscroll
 extends CameraControllerBase
 
 @export var top_left:Vector2 = Vector2(-10,5)

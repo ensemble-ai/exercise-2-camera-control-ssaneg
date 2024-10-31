@@ -1,9 +1,10 @@
-class_name StageThreeCamera
+class_name LerpSmoothingTargetFocus
 extends CameraControllerBase
 
-@export var follow_speed:float = 8
-@export var catchup_speed:float = 15
-@export var leash_distance:float = 8
+@export var lead_speed:float = 70
+@export var catchup_delay_duration:float = 7
+@export var catchup_speed:float = 30
+@export var leash_distance:float = 7
 
 func _ready():
 	position = target.position
@@ -17,21 +18,27 @@ func _process(delta: float):
 	
 	var tpos = target.global_position
 	var cpos = global_position
-	var distance = (tpos-(Vector3(cpos.x, 20, cpos.z))).length()
-	var direction = (tpos-(Vector3(cpos.x, 20, cpos.z))).normalized()	
-	var player_speed = target.velocity.length()
+	var distance = (tpos-Vector3(cpos.x, 20, cpos.z)).length()
+	var direction = (tpos-Vector3(cpos.x, 20, cpos.z)).normalized()
 	
-	#leash distance exceeded
+	#leash exceeded
 	if distance >= leash_distance:
-		global_position += direction*player_speed*delta
+		global_position += direction*(distance-leash_distance)
 	
-	#move at follow speed
-	elif distance < leash_distance and target.velocity != Vector3(0,0,0) and distance > 0.2:
-		global_position += direction*follow_speed*delta
+	#move camera ahead
+	if target.velocity != Vector3(0,0,0):
+		global_position += (target.velocity.normalized())*lead_speed*delta
+		#set catchup delay
+		target.delay = catchup_delay_duration
 	
-	#move at catchup speed
-	elif distance < leash_distance and target.velocity == Vector3(0,0,0) and distance > 0.2:
-		global_position += direction*catchup_speed*delta
+	#catchup camera to target
+	elif target.velocity == Vector3(0,0,0) and distance > 0.25:
+		#wait the length of delay
+		if target.delay>0:
+			target.delay -= 1
+		#catchup camera
+		elif (tpos-cpos).length() > target.WIDTH / 4.0:
+			global_position += direction*catchup_speed*delta
 		
 	super(delta)
 	

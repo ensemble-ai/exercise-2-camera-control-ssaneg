@@ -36,7 +36,6 @@ func _physics_process(_delta):
 		Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
 		).limit_length(1.0)
 	
-	#print(input_dir.y)
 	var direction = (Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	#var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	

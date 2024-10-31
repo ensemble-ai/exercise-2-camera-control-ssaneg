@@ -1,5 +1,9 @@
-class_name StageOneCamera
+class_name PositionLockLerpSmoothing
 extends CameraControllerBase
+
+@export var follow_speed:float = 8
+@export var catchup_speed:float = 15
+@export var leash_distance:float = 8
 
 func _ready():
 	position = target.position
@@ -11,9 +15,24 @@ func _process(delta: float):
 	if draw_camera_logic:
 		draw_logic()
 	
-	#center camera to target
-	global_position = target.global_position
+	var tpos = target.global_position
+	var cpos = global_position
+	var distance = (tpos-(Vector3(cpos.x, 20, cpos.z))).length()
+	var direction = (tpos-(Vector3(cpos.x, 20, cpos.z))).normalized()	
+	var player_speed = target.velocity.length()
 	
+	#leash distance exceeded
+	if distance >= leash_distance:
+		global_position += direction*player_speed*delta
+	
+	#move at follow speed
+	elif distance < leash_distance and target.velocity != Vector3(0,0,0) and distance > 0.2:
+		global_position += direction*follow_speed*delta
+	
+	#move at catchup speed
+	elif distance < leash_distance and target.velocity == Vector3(0,0,0) and distance > 0.2:
+		global_position += direction*catchup_speed*delta
+		
 	super(delta)
 	
 func draw_logic():
