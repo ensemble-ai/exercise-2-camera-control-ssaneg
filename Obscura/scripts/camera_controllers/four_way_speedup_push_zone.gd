@@ -44,49 +44,51 @@ func _process(delta: float):
 	var diff_between_bottom_inner = (tpos.z + target.HEIGHT / 2.0) - (cpos.z + inner_box_height / 2.0)
 	
 	#booleans for corners
-	var bottom_right = diff_between_right_edges > 0 and diff_between_bottom_edges > 0 
+	var bottom_right = diff_between_right_edges >= 0 and diff_between_bottom_edges >= 0 
 	var top_right = (diff_between_right_edges > 0 or diff_between_right_edges == 0) and (diff_between_top_edges < 0 or diff_between_top_edges == 0)
-	var bottom_left = diff_between_left_edges < 0 and diff_between_bottom_edges > 0
-	var top_left = diff_between_left_edges < 0 and diff_between_top_edges < 0
-	
-	#inner-most area
-	if diff_between_left_inner > 0 and diff_between_right_inner < 0 and diff_between_top_inner > 0 and diff_between_bottom_inner < 0:
-		pass
+	var bottom_left = diff_between_left_edges <= 0 and diff_between_bottom_edges >= 0
+	var top_left = diff_between_left_edges <= 0 and diff_between_top_edges <= 0
 		
 	#speedup zone
-	elif target.velocity != Vector3(0,0,0) and (diff_between_left_edges > 0 and diff_between_top_edges > 0 and diff_between_right_edges < 0 and diff_between_bottom_edges < 0) and (diff_between_left_inner < 0 or diff_between_right_inner > 0 or diff_between_top_inner < 0 or diff_between_bottom_inner > 0):
+	if target.velocity != Vector3(0,0,0) and (diff_between_left_edges > 0 and diff_between_top_edges > 0 and diff_between_right_edges < 0 and diff_between_bottom_edges < 0) and (diff_between_left_inner < 0 or diff_between_right_inner > 0 or diff_between_top_inner < 0 or diff_between_bottom_inner > 0):
 		global_position += direction*player_speed*push_ratio*delta
 	
 	#corners
-	elif top_left:
-		global_position.x += diff_between_left_edges
-		global_position.z += diff_between_top_edges
-	elif top_right:
-		global_position.x += diff_between_right_edges
-		global_position.z += diff_between_top_edges
-	elif bottom_left:
-		global_position.x += diff_between_left_edges
-		global_position.z += diff_between_bottom_edges
-	elif bottom_right:
-		global_position.x += diff_between_bottom_edges
-		global_position.z += diff_between_right_edges
+	elif top_left or top_right or bottom_left or bottom_right:
+		if top_left:
+			global_position.x += diff_between_left_edges
+			global_position.z += diff_between_top_edges
+		if top_right:
+			global_position.x += diff_between_right_edges
+			global_position.z += diff_between_top_edges
+		if bottom_left:
+			global_position.x += diff_between_left_edges
+			global_position.z += diff_between_bottom_edges
+		if bottom_right:
+			global_position.x += diff_between_right_edges
+			global_position.z += diff_between_bottom_edges
 	
-	#left edge
-	elif diff_between_left_edges < 0:
-		global_position.x += diff_between_left_edges
-		global_position.z += direction.z*player_speed*push_ratio*delta
-	#right edge
-	elif diff_between_right_edges > 0:
-		global_position.x += diff_between_right_edges
-		global_position.z += direction.z*player_speed*push_ratio*delta
-	#bottom edge
-	elif diff_between_bottom_edges > 0:
-		global_position.z += diff_between_bottom_edges
-		global_position.x += direction.x*player_speed*push_ratio*delta
-	#top edge
-	elif diff_between_top_edges < 0:
-		global_position.z += diff_between_top_edges
-		global_position.x += direction.x*player_speed*push_ratio*delta
+	elif diff_between_left_edges <= 0 or diff_between_right_edges >= 0 or diff_between_bottom_edges >= 0 or diff_between_top_edges <= 0:
+		#left edge
+		if diff_between_left_edges <= 0:
+			global_position.x += diff_between_left_edges
+			global_position.z += direction.z*player_speed*push_ratio*delta
+		#right edge
+		elif diff_between_right_edges >= 0:
+			global_position.x += diff_between_right_edges
+			global_position.z += direction.z*player_speed*push_ratio*delta
+		#bottom edge
+		elif diff_between_bottom_edges >= 0:
+			global_position.z += diff_between_bottom_edges
+			global_position.x += direction.x*player_speed*push_ratio*delta
+		#top edge
+		elif diff_between_top_edges <= 0:
+			global_position.z += diff_between_top_edges
+			global_position.x += direction.x*player_speed*push_ratio*delta
+		
+	#inner-most area
+	elif diff_between_left_inner > 0 and diff_between_right_inner < 0 and diff_between_top_inner > 0 and diff_between_bottom_inner < 0:
+		pass
 		
 	super(delta)
 	
